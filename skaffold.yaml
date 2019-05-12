@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/swengin/bootiful-jx:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/swengin/bootiful-jx:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: bootiful-jx
+        chartPath: charts/bootiful-jx
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/swengin/bootiful-jx'
+          image.tag: '{{.DIGEST_HEX}}'
